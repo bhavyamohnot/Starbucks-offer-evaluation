@@ -2,7 +2,7 @@
 
 Evaluates 10 reward offers (BOGO, discount, informational) sent to 17,000 Starbucks Rewards app customers: did each offer **cause** extra spending, how much of the reward budget was wasted, and which customers should receive which offer. Built as a CRM / loyalty-programme analysis (e.g. cashback programmes like CLiQ Cash).
 
-**📊 Dashboard:** [Google Sheets (pivots, slicer, reconciliation)]  ·  **📝 Memo:** [docs/memo.md](docs/memo.md)  ·  **🔢 Full results:** [docs/results.md](docs/results.md)
+**📊 Dashboard:** [Google Sheets (pivots, slicer, reconciliation)](https://docs.google.com/spreadsheets/d/1u8Cxzp9UZckH8TFnugbVR53qthWQaBC6Ei03_UrN2CQ/edit?usp=sharing)  ·  **📝 Memo:** [docs/memo.md](docs/memo.md)  ·  **🔢 Full results:** [docs/results.md](docs/results.md)
 
 ## Key findings
 | | |

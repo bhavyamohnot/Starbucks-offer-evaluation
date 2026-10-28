@@ -21,4 +21,4 @@
 4. **Target by segment:** cash offers for the $50–100k, 1–2-year-tenure middle; informational nudges for $100k+ customers and profile-less accounts; onboarding journeys (not cash) for new members.
 5. **Run a randomised holdout (10%)** on the next campaign. This analysis is observational, so a holdout is needed to confirm true incremental lift before scaling.
 
-*SQL and method: https://github.com/bhavyamohnot/starbucks-offer-evaluation · Dashboard: [Google Sheets link]*
+*SQL and method: https://github.com/bhavyamohnot/starbucks-offer-evaluation · Dashboard: https://docs.google.com/spreadsheets/d/1u8Cxzp9UZckH8TFnugbVR53qthWQaBC6Ei03_UrN2CQ/edit?usp=sharing*
