@@ -4,9 +4,9 @@ Apps like Starbucks (or CLiQ Cash on Tata CLiQ) keep sending discounts and cashb
 
 I used the Starbucks Rewards app dataset (simulated by Starbucks for a Udacity project). It has 17,000 customers, 10 different offers and about 306k app events over 30 days. I did the analysis in MySQL and made the dashboard in Google Sheets.
 
-**Dashboard:** [Google Sheets](https://docs.google.com/spreadsheets/d/1u8Cxzp9UZckH8TFnugbVR53qthWQaBC6Ei03_UrN2CQ/edit?usp=sharing)
-**Short memo with recommendations:** [docs/memo.md](docs/memo.md)
-**All results in detail:** [docs/results.md](docs/results.md)
+- Dashboard: [Google Sheets](https://docs.google.com/spreadsheets/d/1u8Cxzp9UZckH8TFnugbVR53qthWQaBC6Ei03_UrN2CQ/edit?usp=sharing)
+- Short memo with recommendations: [docs/memo.md](docs/memo.md)
+- All results in detail: [docs/results.md](docs/results.md)
 
 ## What I found
 
