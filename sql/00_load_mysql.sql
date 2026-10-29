@@ -1,7 +1,3 @@
--- 00_load_mysql.sql
--- Create the database and load the 3 raw CSVs (run with: mysql --local-infile=1).
--- Replace the paths with where your CSVs are.
-
 CREATE DATABASE IF NOT EXISTS starbucks;
 USE starbucks;
 
@@ -27,7 +23,6 @@ FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES;
 
--- Empty gender/income cells become NULL instead of '' / 0.
 LOAD DATA LOCAL INFILE 'C:/Users/erbha/starbucks-offer-evaluation/data/raw/profile.csv'
 INTO TABLE raw_profile
 FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'

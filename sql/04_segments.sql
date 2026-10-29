@@ -1,8 +1,5 @@
--- 04_segments.sql  (MySQL 8.4)
--- Which customer segments do rewarded offers actually move?
 USE starbucks;
 
--- One row per rewarded offer sent, with the customer's segments attached.
 DROP TABLE IF EXISTS offer_segment_base;
 CREATE TABLE offer_segment_base AS
 SELECT
@@ -20,7 +17,6 @@ FROM offer_window_spend w
 JOIN customers c USING (customer_id)
 WHERE w.offer_type <> 'informational';
 
--- Same metrics for each segment dimension, stacked into one table.
 DROP TABLE IF EXISTS segment_response;
 CREATE TABLE segment_response AS
 WITH long_form AS (

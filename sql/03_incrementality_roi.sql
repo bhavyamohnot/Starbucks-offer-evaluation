@@ -1,11 +1,5 @@
--- 03_incrementality_roi.sql  (MySQL 8.4)
--- Did offers raise spending, and did that extra spend cover the reward cost?
--- Method: difference-in-differences.
---   lift  = customer's spend/day inside the offer window - their normal spend/day (whole 30 days)
---   incremental effect = avg lift of viewers - avg lift of recipients who never viewed
 USE starbucks;
 
--- A) Each customer's normal daily spend across the 30-day test.
 DROP TABLE IF EXISTS customer_baseline;
 CREATE TABLE customer_baseline AS
 SELECT c.customer_id,
@@ -16,7 +10,6 @@ LEFT JOIN events e
 GROUP BY c.customer_id;
 ALTER TABLE customer_baseline ADD PRIMARY KEY (customer_id);
 
--- B) Spend inside each offer's window, and the lift over the customer's baseline.
 DROP TABLE IF EXISTS offer_window_spend;
 CREATE TABLE offer_window_spend AS
 SELECT
@@ -34,7 +27,6 @@ LEFT JOIN events t
 GROUP BY o.instance_id, o.customer_id, o.offer_code, o.offer_type, o.outcome,
          o.reward_paid, viewed, window_days, b.spend_per_day;
 
--- C) Incremental spend and ROI per offer.
 DROP TABLE IF EXISTS offer_roi;
 CREATE TABLE offer_roi AS
 SELECT
@@ -54,7 +46,6 @@ GROUP BY offer_code, offer_type;
 
 SELECT * FROM offer_roi ORDER BY incremental_spend_per_reward_dollar DESC;
 
--- D) Totals by offer type.
 SELECT offer_type,
        ROUND(SUM(incremental_spend), 0) AS incremental_spend,
        ROUND(SUM(reward_cost), 0)       AS reward_cost,
