@@ -1,46 +1,57 @@
-# Starbucks Offer Evaluation: Which Rewards Were Worth Paying For? (MySQL · Google Sheets)
+# Starbucks Rewards: Which Offers Were Actually Worth It?
 
-Evaluates 10 reward offers (BOGO, discount, informational) sent to 17,000 Starbucks Rewards app customers: did each offer **cause** extra spending, how much of the reward budget was wasted, and which customers should receive which offer. Built as a CRM / loyalty-programme analysis (e.g. cashback programmes like CLiQ Cash).
+Apps like Starbucks (or CLiQ Cash on Tata CLiQ) keep sending discounts and cashback offers. The question I wanted to answer is simple: did the offer make people spend more, or did we just give money to people who were going to buy anyway?
 
-**📊 Dashboard:** [Google Sheets (pivots, slicer, reconciliation)](https://docs.google.com/spreadsheets/d/1u8Cxzp9UZckH8TFnugbVR53qthWQaBC6Ei03_UrN2CQ/edit?usp=sharing)  ·  **📝 Memo:** [docs/memo.md](docs/memo.md)  ·  **🔢 Full results:** [docs/results.md](docs/results.md)
+I used the Starbucks Rewards app dataset (simulated by Starbucks for a Udacity project). It has 17,000 customers, 10 different offers and about 306k app events over 30 days. I did the analysis in MySQL and made the dashboard in Google Sheets.
 
-## Key findings
-| | |
-|---|---|
-| Wasted rewards | **30% of reward spend ($49.4k of $164.7k)** went to customers who completed the offer without viewing it |
-| ROI by offer type | Discounts: **$4.08** extra spend per $1 of reward · BOGO: **$1.92** |
-| Best offer | $2 off $10, 10 days, all channels: **$9.84** per reward dollar, 60% influenced, 12.5% waste |
-| Worst offer | $5 off $20: 35% view rate, **61% of completions wasted**, $1.42 per reward dollar |
-| Free lift | Informational messages (no reward) added ~$50k of spend |
-| Best segment | $75–100k income, 1–2-year members: ~53% influenced, $2+/day extra spend |
-| Leakage segment | $100k+ customers: 45% of discount completions wasted |
+**Dashboard:** [Google Sheets](https://docs.google.com/spreadsheets/d/1u8Cxzp9UZckH8TFnugbVR53qthWQaBC6Ei03_UrN2CQ/edit?usp=sharing)
+**Short memo with recommendations:** [docs/memo.md](docs/memo.md)
+**All results in detail:** [docs/results.md](docs/results.md)
 
-## Analysis modules
-| Module | Question | SQL |
-|---|---|---|
-| Load | Create database, load 3 CSVs | [00_load_mysql.sql](sql/00_load_mysql.sql) |
-| 1. Clean & data quality | Parse the mixed JSON `value` column; handle age = 118 placeholder | [01_clean_and_quality.sql](sql/01_clean_and_quality.sql) |
-| 2. Offer funnel | View rate, completion rate, influenced vs wasted completions | [02_offer_funnel.sql](sql/02_offer_funnel.sql) |
-| 3. Incrementality & ROI | Did offers raise spending, and did it cover the reward cost? | [03_incrementality_roi.sql](sql/03_incrementality_roi.sql) |
-| 4. Segments | Which income / age / gender / tenure groups respond? | [04_segments.sql](sql/04_segments.sql) |
-| Exports | Tables for the Google Sheets dashboard | [05_exports.sql](sql/05_exports.sql) |
+## What I found
 
-## Methods
-- **MySQL 8.4:** `LOAD DATA LOCAL INFILE`, JSON parsing (`->>`), indexes, correlated subqueries, CTEs, conditional aggregation, `UNION ALL` reshaping.
-- **Offer attribution:** each offer sent is an instance with a validity window; each view/completion is matched to the most recent valid instance. A completion is **influenced** only if the offer was viewed first; otherwise it is **wasted**.
-- **Incrementality (difference-in-differences):** lift = spend/day in the offer window minus the customer's own 30-day average; effect = lift of viewers minus lift of recipients who never viewed. ROI = incremental spend ÷ reward cost.
-- **Google Sheets:** pivot tables (COUNTA, % of row), slicer, ROI chart, and a **reconciliation table** that checks every sheet total against SQL control totals with `COUNTIF` / `SUMIF` / `IF` (all 5 match).
+- 30% of all the reward money ($49k out of $165k) went to people who completed the offer **without ever opening it**. They didn't even know about the offer, so it didn't change anything. That's just wasted money.
+- Discounts did much better than BOGO (buy one get one). For every $1 given as a discount, people spent about $4.08 extra. For BOGO it was only $1.92.
+- The best offer was "$2 off $10, valid 10 days, sent on all channels": around $9.8 extra spend per $1 of reward.
+- The worst was "$5 off $20". Only 35% of people even viewed it and 61% of its completions were wasted.
+- Informational messages (no discount at all) still added about $50k in spend. Sometimes a reminder is enough.
+- People earning $75-100k who have been members for 1-2 years respond the best. People earning $100k+ spend a lot, but 45% of their rewards were wasted. New members (joined 2018) barely respond to anything.
+
+What I'd suggest: give the reward only after the customer has opened the offer, move budget from BOGO to discounts, stop the $5-off-$20 offer, and always keep around 10% of customers as a holdout to check if offers really work.
+
+## How I did it
+
+- **Cleaning:** the events table had offer id, amount and reward all mixed inside one text column, so I converted it to JSON and split it out. Age 118 is basically "unknown" in this data, so I set it to NULL.
+- **Matching events to offers:** every offer someone received has a valid window (say 7 days). Each view and completion is matched to the right offer in that window. If someone completed an offer without viewing it first, I counted it as "wasted".
+- **Did it increase spending?** For each offer I compared how much more a customer spent per day during the offer vs their normal 30-day average. Then I compared people who viewed the offer with people who got it but never opened it (difference-in-differences). The difference is the extra spend the offer caused, and I divided it by the reward cost to get ROI.
+- **Segments:** same numbers split by income, age, gender and how long someone has been a member.
+- **Google Sheets:** I built pivot tables, a slicer, an ROI chart and a small check table (COUNTIF / SUMIF) that matches the sheet totals with the SQL totals. All 5 checks matched.
+
+SQL files, in order:
+
+- `00_load_mysql.sql` - create the database and load the 3 CSVs
+- `01_clean_and_quality.sql` - clean tables + data checks
+- `02_offer_funnel.sql` - views, completions, influenced vs wasted
+- `03_incrementality_roi.sql` - extra spend and ROI per offer
+- `04_segments.sql` - which customers respond
+- `05_exports.sql` - the tables I exported to Google Sheets
+
+## Things I learned / got stuck on
+
+- In my first pivot I used SUM of instance_id instead of COUNTA, so the numbers were huge and meaningless. Counting rows and adding up IDs are not the same thing.
+- MySQL wouldn't let me put an index on the offer_id column pulled from JSON (it was TEXT), so I had to CAST it to CHAR(32).
+- The JSON in the raw file used single quotes, which isn't valid JSON, so I had to replace them before parsing.
+- My slicer was filtering both pivots at first, which I didn't want.
 
 ## Limitations
-- Simulated data. Observational, not a randomised test: viewers may be more engaged customers; comparing each customer with their own baseline reduces but does not remove this bias.
-- Overlapping offer windows mean some spend counts under more than one offer.
-- Channels are bundled per offer (all use email), so single-channel effects cannot be isolated.
-- BOGO cost is booked at reward face value; margin is not in the data.
 
-## Reproduce
-1. Download [ihormuliar/starbucks-customer-data](https://www.kaggle.com/datasets/ihormuliar/starbucks-customer-data) (CDLA-Permissive) into `data/raw/`.
-2. Enable local file loading: `SET PERSIST local_infile = 1;`
-3. Run `sql/00` → `sql/05` in order (`mysql --local-infile=1 < file.sql`), updating the CSV paths in `00_load_mysql.sql`.
+- The data is simulated, not real Starbucks data.
+- This isn't a proper A/B test. People who open offers might just be more active customers anyway. Comparing them to their own normal spend helps, but a real holdout group would be better.
+- Some offers overlap in time, so a bit of spend gets counted under more than one offer.
+- For BOGO I counted the full reward value as the cost. The real cost of a free drink is lower.
 
-## Tools
-MySQL 8.4 · Google Sheets · Git/GitHub
+## If you want to run it yourself
+
+1. Download [ihormuliar/starbucks-customer-data](https://www.kaggle.com/datasets/ihormuliar/starbucks-customer-data) from Kaggle.
+2. In MySQL run `SET PERSIST local_infile = 1;`
+3. Change the CSV paths in `00_load_mysql.sql` to where you saved them, then run the files 00 to 05 in order.
